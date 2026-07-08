@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SkyEye</title>
+<title>SkyEye · Threat defense that runs on your server</title>
 <meta name="description" content="SkyEye is a single binary that stands in front of your application and bans attackers before your server ever hears from them. No third party. No cloud. Your traffic never leaves your machine.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -105,6 +105,7 @@ h1 .dim{color:#6b7280}
   border-radius:0 10px 10px 0!important;
 }
 .cmdbanner.show{transform:none}
+.noanim .slide,.noanim .cmdbanner{transition:none!important}
 
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
@@ -326,7 +327,16 @@ h1 .dim{color:#6b7280}
 <script>
 
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-addEventListener('pageshow', () => scrollTo(0, 0));
+scrollTo(0, 0);
+addEventListener('pageshow', e => {
+  if (!e.persisted && !scrollY) return;
+  document.documentElement.classList.add('noanim');
+  scrollTo(0, 0);
+  dispatchEvent(new Event('scroll'));
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.documentElement.classList.remove('noanim');
+  }));
+});
 
 document.querySelectorAll('.seq').forEach(sec => {
   const slides = [...sec.querySelectorAll('.slide')];
