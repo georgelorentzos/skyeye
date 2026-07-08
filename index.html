@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkyEye · Threat defense that runs on your server</title>
+<meta name="description" content="SkyEye is a single binary that stands in front of your application and bans attackers before your server ever hears from them. No third party. No cloud. Your traffic never leaves your machine.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#000;
+  --black:#000;
+  --txt:#f2f4f7;
+  --dim:#848b96;
+  --faint:#41474f;
+  --hair:rgba(255,255,255,.07);
+  --sans:'Inter',system-ui,sans-serif;
+  --disp:'Inter',system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0!important}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--txt);
+  font-family:var(--sans);
+  font-size:17px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+::selection{background:#fff;color:#000}
+.wrap{max-width:1060px;margin:0 auto;padding:0 32px}
+
+html{scrollbar-width:none;-ms-overflow-style:none}
+::-webkit-scrollbar{display:none}
+
+
+.top{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:22px 32px;border-bottom:1px solid var(--hair);
+  background:rgba(0,0,0,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.brand{font-family:var(--disp);font-weight:700;font-size:20px;letter-spacing:-.02em;color:#fff}
+.brand a{text-decoration:none;color:inherit}
+.brand .d{color:#6b7280}
+.top nav{display:flex;gap:26px}
+.top nav a{font-size:13.5px;color:var(--dim);text-decoration:none;transition:color .15s}
+.top nav a:hover{color:#fff}
+.top nav a.here{color:#fff}
+@media(max-width:640px){
+  .top{justify-content:center}
+  .top .brand{display:none}
+}
+
+.btn{
+  display:inline-block;background:#fff;color:#000;text-decoration:none;
+  font-size:15px;font-weight:600;padding:9px 26px;letter-spacing:-.01em;
+  transition:background .2s;border:0;cursor:pointer;font-family:var(--sans);
+}
+.btn:hover{background:#c9cdd3}
+.btn.big{padding:12px 40px;font-size:16px;border-radius:10px!important}
+#dlbtn{font-family:var(--disp);font-weight:700;letter-spacing:-.02em}
+.btn.line{background:transparent;border:1px solid var(--hair);color:var(--txt);transition:border-color .4s ease}
+.btn.line:hover{border-color:rgba(255,255,255,.32);background:transparent}
+
+h1,h2{font-family:var(--disp)}
+h1{font-size:clamp(44px,7vw,88px);font-weight:700;letter-spacing:-.04em;line-height:1.02;margin-bottom:28px;color:#fff;position:relative}
+h1 .dim{color:#6b7280}
+.sub{font-size:20px;color:var(--dim);max-width:540px;margin:0 auto 48px;line-height:1.65;position:relative}
+.sub b{color:var(--txt);font-weight:500}
+.cta-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;position:relative}
+
+.seq{position:relative}
+.facts{height:2590vh}
+.snap{position:absolute;left:0;width:1px;height:1px;scroll-snap-align:start;scroll-snap-stop:always}
+@media(pointer:coarse){
+  html{scroll-snap-type:y mandatory}
+}
+.seq-sticky{position:sticky;top:0;height:100vh;overflow:hidden}
+.slide{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;padding:0 32px;
+  opacity:0;transform:translateY(52px) scale(.985);filter:blur(10px);pointer-events:none;
+  transition:opacity .55s ease,transform .6s cubic-bezier(.2,.7,.3,1),filter .55s ease;
+}
+.slide.active{opacity:1;transform:none;filter:none;pointer-events:auto}
+.slide.passed{opacity:0;transform:translateY(-52px) scale(.985);filter:blur(10px)}
+.slide h2{font-size:clamp(34px,5.6vw,64px);font-weight:700;letter-spacing:-.035em;line-height:1.12;max-width:880px;color:#fff}
+.slide h2 .dim{color:#6b7280}
+.slide p{color:var(--dim);font-size:17.5px;max-width:580px;margin-top:26px;line-height:1.7}
+
+.copyright{margin-top:52px;font-size:13px;color:var(--faint)}
+
+.cmdbanner{
+  position:absolute;top:104px;left:0;z-index:5;
+  background:#fff;color:#000;font-family:var(--disp);
+  font-size:17px;font-weight:700;letter-spacing:-.02em;padding:12px 30px 12px 34px;
+  transform:translateX(-100%);
+  transition:transform .55s cubic-bezier(.2,.7,.3,1);
+  pointer-events:none;
+  border-radius:0 10px 10px 0!important;
+}
+.cmdbanner.show{transform:none}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><a href="index.html">Sky<span class="d">Eye</span></a></div>
+  <nav>
+    <a href="index.html" class="here">Home</a>
+    <a href="documentation.html">Documentation</a>
+    <a href="licenses.html">Licenses</a>
+  </nav>
+</header>
+
+<section class="facts seq" id="facts">
+  <div class="seq-sticky">
+
+    <div class="cmdbanner" id="cmdbanner">Commands</div>
+
+    <div class="slide">
+      <h1><span class="dim">SkyEye</span> Threat Defense</h1>
+      <p class="sub">SkyEye stands in front of your application and <b>bans attackers before your server ever hears from them.</b> One binary, on your machine, not on someone else's cloud.</p>
+      <div class="cta-row">
+        <a class="btn big" href="licenses.html">Buy a License</a>
+        <a class="btn big line" id="howbtn" href="#facts">How it works</a>
+      </div>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">It knows</span> 264 attacks <span class="dim">by name.</span></h2>
+      <p>Leaked secrets. Stolen keys. Hidden backdoors. SkyEye recognizes every classic move on first contact and closes the door before it opens.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">Disguises</span> come off <span class="dim">at the door.</span></h2>
+      <p>Attackers wrap exploits in layer after layer of encoding to slip past filters. SkyEye peels every layer, in the path and in the query string, and judges what's underneath. The disguise itself is what gives them away.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">One probe.</span> Seven days banned.</h2>
+      <p>Most servers forgive and forget. SkyEye remembers. A single wrong move costs the attacker a full week. No warnings. No second chances.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">Come back, and</span> it gets worse.</h2>
+      <p>A second offense costs two weeks. A third costs a month. SkyEye keeps the record for ninety days. Scanners that plan to wait out their sentence find a longer one waiting.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">New tricks</span> don't work here.</h2>
+      <p>SkyEye reads behavior, not just signatures. Thirty suspicious not-founds in a minute reads as a scan, even with an attack no one has seen before.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">Flood it, and</span> you're gone.</h2>
+      <p>Every visitor gets a fair pace. Cross it and SkyEye slows you down. Abuse it and you stop being a visitor. The door closes for an hour.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">Real visitors</span> never feel it.</h2>
+      <p>A broken image link never bans a customer. An office sharing one IP never trips the alarm. And your own address can be made untouchable with a single line of config. Permanently, across restarts.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">Attackers scan</span> every server<br><span class="dim">on the internet.</span></h2>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">They only remember the one<br>that</span> banned them.</h2>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">It's a</span> security gateway.</h2>
+      <p>Not a filter you bolt onto your proxy. SkyEye is the guarded front door itself. It owns the port, terminates the connection, and forwards only clean traffic to your app. The protection comes for free because nothing reaches your server any other way.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">Built for</span> backends<span class="dim">, not websites.</span></h2>
+      <p>If it runs on a port, SkyEye stands in front of it: APIs, app servers, microservices, WebSocket services. If your site is files on a disk, that's a web server's job. SkyEye guards applications. It doesn't host pages.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">It fronts your app,</span> like a reverse proxy.</h2>
+      <p>Path routing, WebSocket support, request limits, real client IPs. For a typical reverse-proxy setup it does the front-door job nginx was doing, in one binary with a config a human can actually read.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">HTTPS</span> handles itself.</h2>
+      <p>Point your domain at the server and SkyEye fetches its certificate from Let's Encrypt on the first request, then renews it forever. No certbot, no cron jobs, no expired-certificate outages at 3am.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">Route by path</span> to any backend.</h2>
+      <p>Send /livekit to one service, everything else to your app, cap the upload route at 50MB, inject a header on another. A few lines of readable config, applied live.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">One app,</span> three servers? <span class="dim">Balanced.</span></h2>
+      <p>List several servers on a route and SkyEye spreads your visitors across them. A server that stops answering is taken out of rotation, and its traffic flows to the others until it recovers. No health checks to configure, no extra software.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">Long connections</span> stay open.</h2>
+      <p>WebSockets and live event streams are first-class. Signaling, driver events, passenger listeners. They hold for hours without being cut, and every byte is flushed through the moment it arrives.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">Your terminal is</span> the dashboard.</h2>
+      <p>No web panel to secure. No login to leak. SkyEye is administered through a local socket that never touches the network. It answers to the person at the keyboard of that machine, and no one else.</p>
+    </div>
+
+    <div class="slide" data-c="status">
+      <h2><span class="dim">skyeye</span> status</h2>
+      <p>Live counters at a glance. Uptime, active bans grouped by reason, and the size of every tracker. One command tells you the whole state of the wall.</p>
+    </div>
+
+    <div class="slide" data-c="stats">
+      <h2><span class="dim">skyeye</span> stats</h2>
+      <p>Traffic totals, requests per second, and the leaderboards. Top requesters, top 404 sources, top repeat offenders. The black box becomes a glass one.</p>
+    </div>
+
+    <div class="slide" data-c="bans">
+      <h2><span class="dim">skyeye</span> bans</h2>
+      <p>Every active ban with its ID, target, time remaining and reason. IPv6 entries show the whole /64 block they cover.</p>
+    </div>
+
+    <div class="slide" data-c="ban">
+      <h2><span class="dim">skyeye</span> ban</h2>
+      <p>You spot an abuser in the logs. Ban them by hand, without waiting for a rule to trip. Durations the way you think them. Plain seconds, 30m, 2h, 7d. Manual bans always apply exactly what you typed.</p>
+    </div>
+
+    <div class="slide" data-c="check">
+      <h2><span class="dim">skyeye</span> check</h2>
+      <p>The full story of one address. Banned or not, why, until when, its offense history and how it behaves right now. The command you reach for when someone says they're blocked.</p>
+    </div>
+
+    <div class="slide" data-c="unban">
+      <h2><span class="dim">skyeye</span> unban</h2>
+      <p>Lift any ban by ID or by address. It forgives the offense history too, so a wrongly banned visitor never faces escalation for your mistake.</p>
+    </div>
+
+    <div class="slide" data-c="reload">
+      <h2><span class="dim">skyeye</span> reload</h2>
+      <p>Thresholds, ban lengths and the never-ban allowlist live in one config file. Edit it, reload, and the new rules apply between one request and the next, with zero dropped connections and zero restarts.</p>
+    </div>
+
+    <div class="slide" data-c="stop">
+      <h2><span class="dim">skyeye</span> stop</h2>
+      <p>Graceful shutdown that cleans up after itself. No PID hunting, nothing left behind. Restarting clears every ban. The ultimate undo button.</p>
+    </div>
+
+    <div class="slide">
+      <h2>One binary. <span class="dim">The whole arsenal.</span></h2>
+      <p>264 attack paths recognized on first contact. Ninety days of offense memory. Zero dependencies, zero databases, zero accounts, zero third parties. Everything that follows ships in a single file.</p>
+    </div>
+
+    <div class="slide">
+      <h2>Signature blocklist<span class="dim">, preprocessed.</span></h2>
+      <p>Env files, git internals, SSH keys, cloud credentials, database dumps, webshells, admin panels, WordPress probes. All compiled at startup into a constant-time lookup, so recognition costs nothing per request.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">Encoding tricks,</span> unwrapped.</h2>
+      <p>Percent-encoding is peeled layer by layer until the request stops changing. The double-encoded tricks that slide past naive filters are precisely what gets caught here.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">Query strings,</span> inspected.</h2>
+      <p>Probes don't ride in on parameters either. A page parameter reaching for a traversal path is decoded, read, and banned like the attack it is.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">Scanners betrayed by</span> their own guessing.</h2>
+      <p>Zero-day tools give themselves away by probing. Thirty suspicious misses a minute, or 120 of any kind, reads as a scan with no signature required. Your own broken asset links never count.</p>
+    </div>
+
+    <div class="slide">
+      <h2>Rate limiting <span class="dim">that stays fair.</span></h2>
+      <p>A sliding 60-second window with a hard abuse line. Static assets are exempt, so an image-heavy page loaded by a whole office behind one IP punishes no one.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">Sentences that</span> escalate.</h2>
+      <p>The first automatic ban lasts a week, the second two weeks, the third a month. Manual bans always honor your exact duration. The machine escalates, the operator decides.</p>
+    </div>
+
+    <div class="slide">
+      <h2>IPv6 <span class="dim">done right.</span></h2>
+      <p>Bans cover the attacker's whole /64 block. Rotating through trillions of neighbouring addresses buys exactly nothing.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">Proxy-aware,</span> spoof-proof.</h2>
+      <p>Behind Cloudflare or nginx, one flag honors real client IPs, read from the trusted end of the forwarding chain, so a forged header can't frame someone else or save the attacker.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">Logs</span> built for grep.</h2>
+      <p>Every ban, block and rate-limit is one structured line on your disk. Sensitive query data is deliberately never written, so your logs can't leak what they don't contain.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">Nothing</span> left behind.</h2>
+      <p>All state lives in memory. Stop it and the socket is cleaned up. Restart it and every questionable ban is forgiven. Delete the binary and SkyEye was never here. That's the whole uninstall guide.</p>
+    </div>
+
+    <div class="slide">
+      <h2><span class="dim">And this is all</span> attackers ever get.</h2>
+      <p>No error page to fingerprint. No server to probe. Just a closed door, a reason, and a date one week away.</p>
+      <div class="copyright">© 2026 SkyEye.</div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+addEventListener('pageshow', () => scrollTo(0, 0));
+
+document.querySelectorAll('.seq').forEach(sec => {
+  const slides = [...sec.querySelectorAll('.slide')];
+  const banner = document.getElementById('cmdbanner');
+  const update = () => {
+    const total = sec.offsetHeight - innerHeight;
+    const t = Math.min(Math.max(-sec.getBoundingClientRect().top / total, 0), .999);
+    const idx = Math.floor(t * slides.length);
+    slides.forEach((f, i) => {
+      f.classList.toggle('active', i === idx);
+      f.classList.toggle('passed', i < idx);
+    });
+
+    banner.classList.toggle('show', !!(slides[idx] && slides[idx].dataset.c));
+  };
+  addEventListener('scroll', update, { passive: true });
+  addEventListener('resize', update);
+  update();
+
+  const marks = slides.map(() => {
+    const m = document.createElement('div');
+    m.className = 'snap';
+    sec.appendChild(m);
+    return m;
+  });
+  const place = () => {
+    const step = (sec.offsetHeight - innerHeight) / slides.length;
+    marks.forEach((m, i) => { m.style.top = i ? (step * (i + .5)) + 'px' : '0px'; });
+  };
+  place();
+  addEventListener('resize', place);
+});
+
+document.getElementById('howbtn').addEventListener('click', e => {
+  e.preventDefault();
+  const sec = document.querySelector('.seq');
+  const slides = sec.querySelectorAll('.slide').length;
+  const step = (sec.offsetHeight - innerHeight) / slides;
+  scrollTo({ top: sec.offsetTop + step * 1.05, behavior: 'smooth' });
+});
+</script>
+</body>
+</html>

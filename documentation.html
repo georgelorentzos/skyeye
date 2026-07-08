@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkyEye · Documentation</title>
+<meta name="description" content="The SkyEye handbook: getting started, HTTPS, routing, the defense system, and day-to-day commands. Everything you need, chapter by chapter.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#000;
+  --black:#000;
+  --panel:#000;
+  --txt:#f2f4f7;
+  --dim:#848b96;
+  --faint:#41474f;
+  --hair:rgba(255,255,255,.07);
+  --hair2:rgba(255,255,255,.05);
+  --acc:#fff;
+  --sans:'Inter',system-ui,sans-serif;
+  --disp:'Inter',system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0!important}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--txt);font-family:var(--sans);
+  font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+::selection{background:#fff;color:#000}
+a{color:inherit}
+
+html{scrollbar-width:none;-ms-overflow-style:none}
+*{scrollbar-width:none}
+::-webkit-scrollbar{display:none}
+
+.shell{display:grid;grid-template-columns:250px 1fr;width:100%;gap:0;padding-top:75px}
+@media(max-width:860px){.shell{grid-template-columns:1fr}}
+
+.side{
+  position:sticky;top:75px;align-self:start;height:calc(100vh - 75px);overflow-y:auto;
+  border-right:1px solid var(--hair);padding:34px 26px 60px;
+}
+@media(max-width:860px){.side{display:none}}
+.brand{font-family:var(--disp);font-weight:700;font-size:20px;letter-spacing:-.02em;margin-bottom:4px;color:#fff}
+.brand a{text-decoration:none}
+.brand .d{color:#6b7280}
+.side .tag{font-size:12.5px;color:var(--faint);margin-bottom:30px}
+.side h4{font-family:var(--sans);font-weight:500;font-size:12.5px;color:var(--faint);margin:26px 0 10px}
+.side a.nav{display:block;text-decoration:none;color:var(--dim);font-size:13.5px;padding:5px 0;transition:color .15s}
+.side a.nav:hover{color:#fff}
+.side a.nav.active{color:#fff}
+.back{display:inline-block;margin-bottom:26px;font-size:13px;color:var(--faint);text-decoration:none}
+.back:hover{color:var(--dim)}
+
+.top{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  width:100%;padding:22px 32px;
+  border-bottom:1px solid var(--hair);
+  background:rgba(0,0,0,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.top .brand{margin-bottom:0}
+.top nav{display:flex;gap:26px}
+.top nav a{font-size:13.5px;color:var(--dim);text-decoration:none;transition:color .15s}
+.top nav a:hover{color:#fff}
+.top nav a.here{color:#fff}
+@media(max-width:640px){
+  .top{justify-content:center}
+  .top .brand{display:none}
+}
+
+.main,.side{
+  opacity:0;transform:translateY(52px) scale(.985);filter:blur(10px);
+  transition:opacity .55s ease,transform .6s cubic-bezier(.2,.7,.3,1),filter .55s ease;
+}
+.main.in,.side.in{opacity:1;transform:none;filter:none}
+.main{padding:calc(clamp(110px,15vh,160px) - 75px) 56px 140px;min-width:0}
+@media(max-width:860px){.main{padding:calc(clamp(110px,15vh,160px) - 75px) 26px 100px}}
+.main section{margin-bottom:64px;scroll-margin-top:99px}
+h1{font-family:var(--disp);font-weight:700;font-size:clamp(38px,4.5vw,52px);letter-spacing:-.04em;line-height:1.02;margin-bottom:20px;color:#fff}
+h1 .dim,h2 .dim{color:#6b7280}
+.lede{color:var(--dim);font-size:20px;line-height:1.65;max-width:620px;margin-bottom:20px}
+.lede b{color:var(--txt);font-weight:500}
+h2{font-family:var(--disp);font-weight:700;font-size:28px;letter-spacing:-.035em;line-height:1.12;margin-bottom:14px;padding-top:8px;color:#fff}
+h3{font-family:var(--disp);font-weight:600;font-size:18px;letter-spacing:-.02em;margin:26px 0 10px;color:#fff;scroll-margin-top:99px}
+p{color:var(--dim);margin-bottom:14px;max-width:680px}
+p b,li b{color:var(--txt);font-weight:500}
+ul,ol{color:var(--dim);margin:0 0 14px 20px;max-width:680px}
+li{margin-bottom:7px}
+.hr{height:1px;background:var(--hair);border:0;margin:56px 0}
+code{font-family:var(--mono);font-size:.88em;color:#fff;background:rgba(255,255,255,.06);padding:2px 6px}
+pre{
+  background:var(--panel);border:1px solid var(--hair);
+  padding:18px 20px;overflow-x:auto;margin:0 0 18px;max-width:820px;
+}
+pre code{background:none;padding:0;font-size:13px;line-height:1.9;color:var(--txt)}
+.cm{color:var(--faint)}
+.k{color:#fff}
+.s{color:var(--dim)}
+.r{color:#fff;font-weight:600}
+.callout{
+  border:1px solid var(--hair);border-left:2px solid #fff;
+  background:var(--panel);padding:14px 18px;margin:0 0 18px;max-width:820px;font-size:14px;color:var(--dim);
+}
+.callout b{color:var(--txt)}
+table{border-collapse:collapse;width:100%;max-width:820px;margin:6px 0 20px;font-size:13.5px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--hair2);vertical-align:top}
+th{font-family:var(--sans);font-weight:500;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);border-bottom:1px solid var(--hair)}
+td code{white-space:nowrap;font-size:12.5px}
+td:last-child{color:var(--dim)}
+@media(max-width:860px){
+  table{display:block;overflow-x:auto}
+}
+.tag2{display:inline-block;font-family:var(--sans);font-weight:500;font-size:10.5px;letter-spacing:.08em;color:var(--faint);border:1px solid var(--hair);padding:1px 7px;margin-left:6px}
+.pill{font-family:var(--sans);font-weight:500;font-size:11px;color:var(--txt);border:1px solid rgba(255,255,255,.32);padding:1px 7px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><a href="index.html">Sky<span class="d">Eye</span></a></div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="documentation.html" class="here">Documentation</a>
+    <a href="licenses.html">Licenses</a>
+  </nav>
+</header>
+
+<div class="shell">
+
+  <aside class="side">
+    <h4>The basics</h4>
+    <a class="nav" href="#welcome">Welcome</a>
+    <a class="nav" href="#start">Getting started</a>
+    <a class="nav" href="#config">The config file</a>
+
+    <h4>Your setup</h4>
+    <a class="nav" href="#https">HTTPS</a>
+    <a class="nav" href="#routing">Routing</a>
+    <a class="nav" href="#proxy">Behind Cloudflare / nginx</a>
+
+    <h4>The defense</h4>
+    <a class="nav" href="#defense">How SkyEye defends you</a>
+    <a class="nav" href="#tuning">Tuning the defense</a>
+    <a class="nav" href="#allowlist">People you never ban</a>
+
+    <h4>Running it</h4>
+    <a class="nav" href="#cli">Day-to-day commands</a>
+    <a class="nav" href="#nginx">Coming from nginx</a>
+    <a class="nav" href="#notes">Good to know</a>
+    <a class="nav" href="#advanced">Advanced settings</a>
+  </aside>
+
+  <main class="main">
+
+    <section id="welcome">
+      <h1><span class="dim">The SkyEye</span> Handbook</h1>
+      <p class="lede">SkyEye is a single binary that stands in front of your application, filters every request, and <b>bans attackers before your server ever hears from them.</b> This handbook takes you from download to daily operation, one chapter at a time.</p>
+      <p>Here is the whole mental model, in three sentences:</p>
+      <ul>
+        <li><b>It's the front door.</b> SkyEye owns your public port, terminates the connection, and forwards only clean traffic to your app, like nginx but with a built-in defense system.</li>
+        <li><b>One binary, two roles.</b> Run <code>skyeye</code> with no arguments and it's the server. Run it with a command like <code>skyeye status</code> or <code>skyeye bans</code> and it's a client talking to the running server.</li>
+        <li><b>One file configures everything.</b> A single <code>skyeye.yaml</code> next to the binary holds every setting. Every setting has a sensible default, so your file stays tiny.</li>
+      </ul>
+      <div class="callout"><b>You can skip configuration entirely.</b> With no config file at all, SkyEye listens on port 80 and forwards everything to <code>http://127.0.0.1:8080</code>. On first run it writes a fully-commented starter <code>skyeye.yaml</code> for you, and it never overwrites an existing one.</div>
+      <div class="callout"><b>What SkyEye is for.</b> SkyEye guards <b>applications</b>: APIs, app servers, microservices, anything that listens on a port. It is not a web server. It does not host static websites from disk. Simple rule: apps on ports, SkyEye. Files on disk, nginx or a CDN.</div>
+      <p>If you only read two chapters, read <a href="#start" style="color:var(--txt)">Getting started</a> and <a href="#defense" style="color:var(--txt)">How SkyEye defends you</a>. Everything else is here for the day you need it.</p>
+    </section>
+
+    <hr class="hr">
+
+    <section id="start">
+      <h2>Getting started</h2>
+      <p>SkyEye is one self-contained executable: no dependencies, no database, no installer. Getting to a protected app takes three steps.</p>
+
+      <h3>Step 1: Run it once</h3>
+      <pre><code><span class="cm"># ports 80 and 443 need root</span>
+sudo ./skyeye</code></pre>
+      <p>On this first run SkyEye writes a starter <code>skyeye.yaml</code> next to itself, starts listening on port 80, and forwards traffic to <code>http://127.0.0.1:8080</code>. If that's where your app lives, you are already protected.</p>
+
+      <h3>Step 2: Point it at your app</h3>
+      <p>Open <code>skyeye.yaml</code> and set one line to wherever your application listens:</p>
+      <pre><code><span class="k">backend_url</span>: <span class="s">http://127.0.0.1:3000</span></code></pre>
+
+      <h3>Step 3: Make it a service</h3>
+      <p>For a real server you want SkyEye to start on boot and restart if it ever dies. One systemd unit does it:</p>
+      <pre><code><span class="cm"># /etc/systemd/system/skyeye.service</span>
+[Unit]
+Description=SkyEye
+After=network.target
+
+[Service]
+WorkingDirectory=/etc/skyeye
+ExecStart=/usr/local/bin/skyeye
+Restart=always
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+      <pre><code>sudo systemctl enable --now skyeye</code></pre>
+      <p>Keep <code>skyeye.yaml</code> in the <code>WorkingDirectory</code> so SkyEye finds it automatically.</p>
+      <div class="callout"><b>That's a complete setup.</b> The full defense (attack-path bans, scanner detection, rate limiting) is already active with zero configuration. The next chapters add HTTPS and routing when you need them.</div>
+    </section>
+
+    <hr class="hr">
+
+    <section id="config">
+      <h2>The config file</h2>
+      <p>Everything lives in <code>skyeye.yaml</code>. There is no second file, no environment soup, no web panel. Three rules to live by:</p>
+      <ul>
+        <li><b>Only keep the keys you change.</b> Every setting has a built-in default. A production config is often three lines long.</li>
+        <li><b>Edit, then <code>skyeye reload</code>.</b> Changes apply live, between one request and the next, with zero dropped connections.</li>
+        <li><b>Lines starting with <code>#</code> are comments.</b> Use them.</li>
+      </ul>
+
+      <h3>A realistic production config</h3>
+      <p>This is what a typical finished file looks like: one app, HTTPS, and an office IP that can never be banned:</p>
+      <pre><code><span class="k">backend_url</span>: <span class="s">http://127.0.0.1:8080</span>
+
+<span class="k">tls</span>: <span class="k">true</span>
+<span class="k">domains</span>: [<span class="s">api.example.com</span>]
+
+<span class="k">allowlist</span>:
+  - <span class="s">198.51.100.7</span>   <span class="cm"># office</span></code></pre>
+
+      <h3>Reload vs. restart</h3>
+      <p>Almost everything applies live with <code>skyeye reload</code>: routes, the allowlist, rate limits, ban durations, thresholds. A few settings rebind network sockets and need a full restart instead:</p>
+      <ul>
+        <li><code>listen_addr</code> and the TLS group (<code>tls</code>, <code>tls_addr</code>, <code>domains</code>, <code>cert_dir</code>)</li>
+        <li><code>backend_url</code></li>
+      </ul>
+      <div class="callout">You don't have to memorize this list. If you <code>skyeye reload</code> and a changed setting needs a restart, SkyEye <b>tells you</b> and keeps the running value until you restart.</div>
+    </section>
+
+    <hr class="hr">
+
+    <section id="https">
+      <h2>HTTPS</h2>
+      <p>Two lines give you automatic HTTPS, forever:</p>
+      <pre><code><span class="k">tls</span>: <span class="k">true</span>
+<span class="k">domains</span>: [<span class="s">example.com</span>, <span class="s">www.example.com</span>]</code></pre>
+      <p>With that in place, SkyEye:</p>
+      <ul>
+        <li>owns port 443 and fetches a free certificate from <b>Let's Encrypt</b> on the first request to each domain,</li>
+        <li><b>renews certificates automatically</b> before they expire. No certbot, no cron jobs, no 3am expired-certificate outages,</li>
+        <li>turns port 80 into a redirect: every plain-HTTP visitor is sent to HTTPS.</li>
+      </ul>
+
+      <h3>Before you flip it on</h3>
+      <ul>
+        <li><b>DNS must point at this server</b> for every domain you list. Let's Encrypt verifies by visiting you.</li>
+        <li><b>Ports 80 and 443 must both be open.</b> Port 80 isn't optional. It's how domains are validated.</li>
+      </ul>
+      <div class="callout"><b>Back up the <code>skyeye-certs</code> folder.</b> It holds your certificates and Let's Encrypt account key. Lose it and SkyEye simply re-issues on next start, but keeping it avoids rate-limit trouble if you reinstall often. Change its location with <code>cert_dir</code>.</div>
+      <p>All listed domains share the same routes. Routing is by <b>path</b>, not by domain. If you need different backends per domain, keep that split in your app for now.</p>
+    </section>
+
+    <hr class="hr">
+
+    <section id="routing">
+      <h2>Routing</h2>
+      <p>One app needs no routing at all; <code>backend_url</code> is enough. The moment you run two services on one server, add a <code>routes</code> list. It's SkyEye's version of nginx <code>location</code> blocks, readable by humans:</p>
+      <pre><code><span class="k">routes</span>:
+  - <span class="k">prefix</span>: <span class="s">/api/</span>
+    <span class="k">target</span>: <span class="s">http://127.0.0.1:9000</span>
+  - <span class="k">prefix</span>: <span class="s">/</span>
+    <span class="k">target</span>: <span class="s">http://127.0.0.1:3000</span></code></pre>
+
+      <h3>How a route is chosen</h3>
+      <ul>
+        <li>A request matches a route when its path <b>starts with</b> the route's <code>prefix</code>.</li>
+        <li><b>Longest prefix wins:</b> <code>/api/users</code> goes to <code>/api/</code>, not <code>/</code>.</li>
+        <li><code>/</code> is the catch-all. Order in the file doesn't matter. SkyEye sorts for you.</li>
+      </ul>
+
+      <h3>What every route does for free</h3>
+      <p>You never configure any of this. It's on for all routes, always:</p>
+      <ul>
+        <li>The original <code>Host</code> plus <code>X-Real-IP</code>, <code>X-Forwarded-For</code> and <code>X-Forwarded-Proto</code> are forwarded to your backend.</li>
+        <li><b>WebSockets and event streams just work</b>, and stay open for hours.</li>
+        <li>Responses <b>stream through immediately</b>, with no buffering.</li>
+      </ul>
+
+      <h3>The route options</h3>
+      <table>
+        <tr><th>Field</th><th>Type</th><th>What it does</th></tr>
+        <tr><td><code>prefix</code></td><td>string <span class="pill">required</span></td><td>Path prefix to match, e.g. <code>/api/</code>.</td></tr>
+        <tr><td><code>target</code></td><td>string</td><td>Backend URL, e.g. <code>http://127.0.0.1:8080</code>. Use this or <code>targets</code>.</td></tr>
+        <tr><td><code>targets</code></td><td>list</td><td>Several backend URLs. SkyEye load-balances visitors across them and skips a server that stops answering.</td></tr>
+        <tr><td><code>lb</code></td><td>string</td><td>How to balance: <code>round_robin</code> (default) or <code>ip_hash</code>, which keeps each visitor on the same server.</td></tr>
+        <tr><td><code>strip</code></td><td>bool</td><td>Drop the prefix before forwarding. Usually auto-detected, see below.</td></tr>
+        <tr><td><code>body_mb</code></td><td>number</td><td>Max request body for this route in MB, overriding the global <code>max_body_mb</code> (default 10). <code>0</code> = unlimited.</td></tr>
+        <tr><td><code>headers</code></td><td>map</td><td>Extra request headers sent to the backend: an internal key, a marker, a tenant tag.</td></tr>
+      </table>
+
+      <h3>Prefix stripping, in one table</h3>
+      <p>Should the backend see the full public path, or the path with the prefix removed? SkyEye auto-detects from the target: <b>a target with a path strips, a bare host keeps.</b> Set <code>strip</code> yourself only to override.</p>
+      <table>
+        <tr><th>Route</th><th>Request</th><th>Backend receives</th></tr>
+        <tr><td><code>/livekit/</code> → <code>...:7880/</code> <span class="tag2">strip</span></td><td><code>/livekit/rtc</code></td><td><code>/rtc</code></td></tr>
+        <tr><td><code>/</code> → <code>...:8080</code> <span class="tag2">keep</span></td><td><code>/pricing</code></td><td><code>/pricing</code></td></tr>
+        <tr><td><code>/api/</code> → <code>...:8080/v2/</code> <span class="tag2">strip</span></td><td><code>/api/users</code></td><td><code>/v2/users</code></td></tr>
+      </table>
+
+      <h3>Recipe: load-balance across several servers</h3>
+      <p>List more than one server under <code>targets</code> and SkyEye spreads visitors across them automatically. A server that stops answering is taken out of rotation for 10 seconds, and its traffic flows to the others. No health-check setup needed.</p>
+      <pre><code><span class="k">routes</span>:
+  - <span class="k">prefix</span>: <span class="s">/</span>
+    <span class="k">targets</span>:
+      - <span class="s">http://127.0.0.1:8081</span>   <span class="cm"># server a</span>
+      - <span class="s">http://127.0.0.1:8082</span>   <span class="cm"># server b</span>
+      - <span class="s">http://127.0.0.1:8083</span>   <span class="cm"># server c</span></code></pre>
+      <p>If your app keeps login sessions in per-server memory, add <code>lb: ip_hash</code> so each visitor always lands on the same server:</p>
+      <pre><code><span class="k">routes</span>:
+  - <span class="k">prefix</span>: <span class="s">/</span>
+    <span class="k">targets</span>:
+      - <span class="s">http://127.0.0.1:8081</span>
+      - <span class="s">http://127.0.0.1:8082</span>
+    <span class="k">lb</span>: <span class="k">ip_hash</span></code></pre>
+
+      <h3>Recipe: several microservices</h3>
+      <pre><code><span class="k">routes</span>:
+  - <span class="k">prefix</span>: <span class="s">/auth/</span>
+    <span class="k">target</span>: <span class="s">http://127.0.0.1:4001</span>
+  - <span class="k">prefix</span>: <span class="s">/payments/</span>
+    <span class="k">target</span>: <span class="s">http://127.0.0.1:4002</span>
+  - <span class="k">prefix</span>: <span class="s">/</span>
+    <span class="k">target</span>: <span class="s">http://127.0.0.1:8080</span></code></pre>
+
+      <h3>Recipe: big uploads on one route only</h3>
+      <p>Keep the global cap tight and open up just the upload endpoint:</p>
+      <pre><code><span class="k">max_body_mb</span>: <span class="k">10</span>
+
+<span class="k">routes</span>:
+  - <span class="k">prefix</span>: <span class="s">/upload</span>
+    <span class="k">target</span>: <span class="s">http://127.0.0.1:8080</span>
+    <span class="k">body_mb</span>: <span class="k">200</span>
+  - <span class="k">prefix</span>: <span class="s">/</span>
+    <span class="k">target</span>: <span class="s">http://127.0.0.1:8080</span></code></pre>
+
+      <h3>Recipe: a secret header for an internal API</h3>
+      <pre><code><span class="k">routes</span>:
+  - <span class="k">prefix</span>: <span class="s">/internal/</span>
+    <span class="k">target</span>: <span class="s">http://127.0.0.1:9000</span>
+    <span class="k">headers</span>:
+      <span class="k">X-Internal-Key</span>: <span class="s">s3cr3t-shared-token</span>
+  - <span class="k">prefix</span>: <span class="s">/</span>
+    <span class="k">target</span>: <span class="s">http://127.0.0.1:8080</span></code></pre>
+
+      <h3>Recipe: public path ≠ backend path</h3>
+      <p>Public <code>/api/...</code>, but the backend serves it under <code>/v2/...</code>:</p>
+      <pre><code><span class="k">routes</span>:
+  - <span class="k">prefix</span>: <span class="s">/api/</span>
+    <span class="k">target</span>: <span class="s">http://127.0.0.1:9000/v2/</span>
+    <span class="cm"># /api/users  ->  /v2/users</span>
+  - <span class="k">prefix</span>: <span class="s">/</span>
+    <span class="k">target</span>: <span class="s">http://127.0.0.1:8080</span></code></pre>
+
+      <div class="callout"><b>What a route can't do (yet):</b> per-route timeouts, response-header rewriting, authentication, caching, gzip, or per-domain routing. If you need one of these today, keep nginx or your app in the loop for that piece.</div>
+    </section>
+
+    <hr class="hr">
+
+    <section id="proxy">
+      <h2>Behind Cloudflare / nginx</h2>
+      <p>Skip this chapter entirely if SkyEye faces the internet directly. The default behavior is already correct.</p>
+      <p>If a proxy you control sits in front (Cloudflare, or an nginx you're keeping), every connection SkyEye sees comes <b>from the proxy</b>. Without help, SkyEye would treat all your visitors as one IP, and might even ban your own edge. Two lines fix it:</p>
+      <pre><code><span class="k">trust_proxy_headers</span>: <span class="k">true</span>
+<span class="k">trusted_proxy_hops</span>: <span class="k">1</span>   <span class="cm"># how many proxies sit in front</span></code></pre>
+      <p>SkyEye then reads the real client IP the safe way: it prefers Cloudflare's <code>CF-Connecting-IP</code> when present, and otherwise reads <code>X-Forwarded-For</code> counting from the <b>right</b> (the trusted end), so a client can't forge a header to frame someone else or dodge a ban.</p>
+
+      <h3>Recipe: behind Cloudflare</h3>
+      <p>Cloudflare terminates HTTPS at the edge and forwards to SkyEye, so TLS stays off here:</p>
+      <pre><code><span class="k">tls</span>: <span class="k">false</span>
+<span class="k">trust_proxy_headers</span>: <span class="k">true</span>
+<span class="k">trusted_proxy_hops</span>: <span class="k">1</span>
+
+<span class="k">routes</span>:
+  - <span class="k">prefix</span>: <span class="s">/</span>
+    <span class="k">target</span>: <span class="s">http://127.0.0.1:8080</span></code></pre>
+      <div class="callout"><span class="r">Warning:</span> leave <code>trust_proxy_headers</code> at <code>false</code> when SkyEye is directly exposed to the internet. Trusting these headers on the open internet lets anyone forge their IP, evade bans, or get others banned.</div>
+    </section>
+
+    <hr class="hr">
+
+    <section id="defense">
+      <h2>How SkyEye defends you</h2>
+      <p>You don't have to configure any of this. It's all on by default. But knowing <b>how</b> it thinks makes the numbers in the next chapter obvious. SkyEye watches every request with three detectors.</p>
+
+      <h3>1. Known attack paths</h3>
+      <p>Hundreds of paths on the internet are only ever requested by attackers: <code>.env</code> files, git internals, SSH keys, database dumps, webshells, admin-panel probes. SkyEye knows them on sight, including ones wrapped in layers of percent-encoding, in the path or the query string, which it peels off before judging. One hit and the visitor is <b>banned for 7 days</b>. No warnings.</p>
+
+      <h3>2. Scanners betrayed by their guessing</h3>
+      <p>New attack tools give themselves away by probing paths that don't exist. SkyEye counts 404s per visitor:</p>
+      <ul>
+        <li><b>30 suspicious 404s in a minute</b> (dotfiles, <code>.php</code>, <code>.bak</code>…): banned for an hour.</li>
+        <li><b>120 of any kind in a minute</b>: banned, so probing "clean" paths doesn't dodge it.</li>
+        <li><b>100 suspicious 404s in an hour</b>: catches slow scanners that stay under the fast limits.</li>
+      </ul>
+
+      <h3>3. Flooding</h3>
+      <p>Every visitor gets a fair pace: <b>120 requests per minute</b> before SkyEye answers <code>429 Too Many Requests</code>, and <b>400 per minute</b> before an hour-long ban. Static assets (images, CSS, JS, fonts, media) never count, so an asset-heavy page loaded by a whole office behind one IP punishes no one.</p>
+
+      <h3>Repeat offenders have it worse</h3>
+      <p>SkyEye keeps an offense record for 90 days. A second automatic ban lasts <b>at least 2 weeks</b>, and a third and beyond <b>at least 30 days</b>. Scanners that plan to wait out their sentence find a longer one waiting.</p>
+
+      <h3>What honest visitors experience</h3>
+      <ul>
+        <li>A customer with a broken image link is never banned, because asset 404s don't count as suspicious.</li>
+        <li>An office sharing one IP never trips the rate limit on normal browsing.</li>
+        <li>Bans cover an IPv6 attacker's whole <code>/64</code> block, so address-hopping buys nothing, while honest IPv6 users are unaffected.</li>
+        <li>And your own IPs can be made <b>untouchable</b>. That's the <a href="#allowlist" style="color:var(--txt)">allowlist chapter</a>.</li>
+      </ul>
+      <div class="callout"><b>Bans live in memory, on purpose.</b> Restarting SkyEye clears every ban and offense record. It's the ultimate undo button if anything was ever banned wrongly. The allowlist is different: it lives in the config file and survives every restart.</div>
+    </section>
+
+    <hr class="hr">
+
+    <section id="tuning">
+      <h2>Tuning the defense</h2>
+      <p>The defaults fit a typical API or web app. Change them only when reality tells you to, for example a legitimate heavy client hitting <code>429</code>s. Edit, then <code>skyeye reload</code>. Everything here applies live.</p>
+
+      <h3>Pace limits <span style="font-weight:400;font-size:13px;color:var(--faint)">(under <code>rate:</code>)</span></h3>
+      <table>
+        <tr><th>Key</th><th>Default</th><th>Meaning</th></tr>
+        <tr><td><code>limit_max</code></td><td><code>120</code></td><td>Requests per window before a <code>429</code>.</td></tr>
+        <tr><td><code>hard_max</code></td><td><code>400</code></td><td>Requests per window before a ban.</td></tr>
+        <tr><td><code>window_seconds</code></td><td><code>60</code></td><td>The sliding window length.</td></tr>
+      </table>
+
+      <h3>Scanner detection <span style="font-weight:400;font-size:13px;color:var(--faint)">(under <code>storm_404:</code>)</span></h3>
+      <table>
+        <tr><th>Key</th><th>Default</th><th>Meaning</th></tr>
+        <tr><td><code>threshold</code></td><td><code>30</code></td><td>Suspicious 404s per window before a ban.</td></tr>
+        <tr><td><code>any_threshold</code></td><td><code>120</code></td><td>404s of any kind per window before a ban.</td></tr>
+        <tr><td><code>window_seconds</code></td><td><code>60</code></td><td>The fast window length.</td></tr>
+        <tr><td><code>slow_threshold</code></td><td><code>100</code></td><td>Suspicious 404s over the slow window. Catches patient scanners.</td></tr>
+        <tr><td><code>slow_window_seconds</code></td><td><code>3600</code></td><td>The slow window length.</td></tr>
+      </table>
+
+      <h3>Ban lengths <span style="font-weight:400;font-size:13px;color:var(--faint)">(under <code>ban:</code>, in seconds)</span></h3>
+      <table>
+        <tr><th>Key</th><th>Default</th><th>Meaning</th></tr>
+        <tr><td><code>restricted_seconds</code></td><td><code>604800</code></td><td>Known attack-path hit. 604800 = 7 days.</td></tr>
+        <tr><td><code>storm_404_seconds</code></td><td><code>3600</code></td><td>Scanner ban. 3600 = 1 hour.</td></tr>
+        <tr><td><code>rate_abuse_seconds</code></td><td><code>3600</code></td><td>Flooding ban. 3600 = 1 hour.</td></tr>
+      </table>
+      <div class="callout">Escalation for repeat offenders (2 weeks, then 30 days, with a 90-day memory) applies to <b>automatic</b> bans only. A manual <code>skyeye ban</code> always uses exactly the duration you type.</div>
+    </section>
+
+    <hr class="hr">
+
+    <section id="allowlist">
+      <h2>People you never ban</h2>
+      <p>Some addresses must <b>never</b> be locked out, no matter what they do: your office, your uptime monitor, a partner's crawler. Put them on the allowlist:</p>
+      <pre><code><span class="k">allowlist</span>:
+  - <span class="s">198.51.100.7</span>       <span class="cm"># office</span>
+  - <span class="s">203.0.113.20</span>      <span class="cm"># uptime monitor</span>
+  - <span class="s">2001:db8::1</span>       <span class="cm"># IPv6, covers its whole /64</span></code></pre>
+      <p>Then <code>skyeye reload</code>. An allowlisted address:</p>
+      <ul>
+        <li><b>skips every check</b>: bans, rate limits, scanner detection, all of it,</li>
+        <li>has any <b>existing ban and offense history lifted</b> the moment it's added,</li>
+        <li><b>cannot be banned even by hand</b>, so a typo in a <code>skyeye ban</code> command can never lock out something critical,</li>
+        <li><b>survives restarts</b>, because it lives in the config file, not in memory.</li>
+      </ul>
+      <div class="callout"><b>Do this on day one</b> for your office IP and your uptime monitor. It's the one piece of configuration every deployment should have.</div>
+    </section>
+
+    <hr class="hr">
+
+    <section id="cli">
+      <h2>Day-to-day commands</h2>
+      <p>Your terminal is the dashboard. There is no web panel to secure and no login to leak. The CLI talks to the running server over a local socket that never touches the network. Run commands on the same machine, as the same user the server runs as (use <code>sudo</code> if the server runs as root), from the server's directory.</p>
+      <table>
+        <tr><th>Command</th><th>What it does</th></tr>
+        <tr><td><code>skyeye status</code></td><td>The wall at a glance: uptime, active bans by reason, tracker sizes.</td></tr>
+        <tr><td><code>skyeye stats</code></td><td>Traffic totals, requests/sec, top requesters, top 404 sources, top offenders.</td></tr>
+        <tr><td><code>skyeye bans</code></td><td>Every active ban: ID, target, time left, reason.</td></tr>
+        <tr><td><code>skyeye ban &lt;ip&gt; [dur] [reason]</code></td><td>Ban by hand. Durations the way you think them: <code>30m</code>, <code>2h</code>, <code>7d</code>. Default 1h.</td></tr>
+        <tr><td><code>skyeye unban &lt;id|ip&gt;</code></td><td>Lift a ban and forgive its offense history.</td></tr>
+        <tr><td><code>skyeye check &lt;ip&gt;</code></td><td>The full story of one address: banned or not, why, until when, offenses, current rate.</td></tr>
+        <tr><td><code>skyeye reload</code></td><td>Apply config changes live, zero dropped connections.</td></tr>
+        <tr><td><code>skyeye stop</code></td><td>Graceful shutdown.</td></tr>
+      </table>
+
+      <h3>Three moments you'll actually have</h3>
+      <p><b>"Someone says they're blocked."</b> Get their IP and ask SkyEye for the full story, then decide:</p>
+      <pre><code>skyeye check 203.0.113.42
+skyeye unban 203.0.113.42   <span class="cm"># lifts the ban AND forgives the history</span></code></pre>
+      <p><b>"I found an abuser in my logs."</b> Don't wait for a rule to trip:</p>
+      <pre><code>skyeye ban 45.155.205.11 7d scanner from access logs</code></pre>
+      <p><b>"Is it actually doing anything?"</b></p>
+      <pre><code>skyeye status
+skyeye stats</code></pre>
+    </section>
+
+    <hr class="hr">
+
+    <section id="nginx">
+      <h2>Coming from nginx</h2>
+      <p>For the classic front-door job (own the port, terminate TLS, route to backends) SkyEye replaces nginx one-to-one, and adds the defense layer nginx doesn't have. Your config translates line for line:</p>
+      <table>
+        <tr><th>nginx</th><th>SkyEye (skyeye.yaml)</th></tr>
+        <tr><td><code>server_name x.com;</code></td><td><code>domains: [x.com]</code></td></tr>
+        <tr><td><code>client_max_body_size 10m;</code></td><td><code>max_body_mb: 10</code></td></tr>
+        <tr><td><code>location /a/ { proxy_pass …:7880/; }</code></td><td>route <code>/a/</code> → <code>…:7880/</code></td></tr>
+        <tr><td><code>location / { proxy_pass …:8080; }</code></td><td>route <code>/</code> → <code>…:8080</code></td></tr>
+        <tr><td>WebSocket <code>Upgrade</code> headers</td><td>automatic</td></tr>
+        <tr><td><code>proxy_buffering off;</code></td><td>automatic. Responses always stream</td></tr>
+        <tr><td><code>Host / X-Real-IP / X-Forwarded-*</code></td><td>forwarded automatically</td></tr>
+        <tr><td>443 SSL via certbot</td><td><code>tls: true</code></td></tr>
+        <tr><td>80 → 301 redirect</td><td>automatic when TLS is on</td></tr>
+      </table>
+
+      <h3>The cutover, in order</h3>
+      <ol>
+        <li>Write your <code>skyeye.yaml</code>: <code>tls: true</code>, your <code>domains</code>, your routes.</li>
+        <li>Stop nginx to free ports 80 and 443.</li>
+        <li>Start SkyEye (<code>sudo skyeye</code>, or the systemd service from <a href="#start" style="color:var(--txt)">Getting started</a>).</li>
+        <li>Visit your site over HTTPS. The certificate issues on that first request.</li>
+      </ol>
+      <div class="callout"><b>Keep nginx if</b> you rely on something SkyEye deliberately doesn't do: serving static files from disk, gzip, caching, or HTTP/2. SkyEye can also sit <i>behind</i> nginx for just the defense. See <a href="#proxy" style="color:var(--txt)">Behind Cloudflare / nginx</a>.</div>
+    </section>
+
+    <hr class="hr">
+
+    <section id="notes">
+      <h2>Good to know</h2>
+      <ul>
+        <li><b>Bans reset on restart, by design.</b> All ban state lives in memory, so a restart is the escape hatch for any bad ban. The allowlist is unaffected. It lives in the config file.</li>
+        <li><b>Long connections never get cut.</b> WebSockets and event streams hold for hours. Every byte streams through the moment it arrives.</li>
+        <li><b>It's a gateway, not a web server.</b> SkyEye does reverse proxying, routing, load balancing, TLS and defense. It does not serve static files, gzip, cache, or speak HTTP/2.</li>
+        <li><b>Non-HTTP traffic goes around it.</b> WebRTC media over UDP, for example, flows straight to its service. SkyEye handles the HTTP and WebSocket side. Keep those ports open in your firewall.</li>
+      </ul>
+    </section>
+
+    <hr class="hr">
+
+    <section id="advanced">
+      <h2>Advanced settings</h2>
+      <p>Most deployments never touch these. They exist for the day you need them:</p>
+      <table>
+        <tr><th>Key</th><th>Default</th><th>When you'd change it</th></tr>
+        <tr><td><code>request_timeout_seconds</code></td><td><code>120</code></td><td>Max time to read a request (WebSockets and streams exempt). Raise it if users upload big files over slow connections; <code>0</code> disables.</td></tr>
+        <tr><td><code>ipv6_ban_prefix</code></td><td><code>64</code></td><td>How wide an IPv6 ban reaches. Lower to <code>48</code> if an attacker rotates through a huge allocation.</td></tr>
+        <tr><td><code>listen_addr</code></td><td><code>:80</code></td><td>Run the HTTP listener on a different port. <span class="tag2">restart</span></td></tr>
+        <tr><td><code>tls_addr</code></td><td><code>:443</code></td><td>Run the HTTPS listener on a different port. <span class="tag2">restart</span></td></tr>
+        <tr><td><code>cert_dir</code></td><td><code>skyeye-certs</code></td><td>Where certificates are cached. Back it up. <span class="tag2">restart</span></td></tr>
+        <tr><td><code>control_socket</code></td><td><code>/tmp/skyeye.sock</code></td><td>Where the CLI socket lives. If you move it, run CLI commands from the server's directory or set <code>SKYEYE_CONFIG</code>. <span class="tag2">restart</span></td></tr>
+      </table>
+      <p style="font-size:13.5px">One environment variable exists: <code>SKYEYE_CONFIG=/path/to/skyeye.yaml</code> points both the server and the CLI at a config outside the working directory.</p>
+    </section>
+
+  </main>
+</div>
+
+<script>
+
+const links = [...document.querySelectorAll('.side a.nav')];
+const sections = links
+  .map(a => document.getElementById(a.getAttribute('href').slice(1)))
+  .filter(Boolean);
+
+const spy = () => {
+  let current = sections[0];
+  for (const s of sections) {
+    if (s.getBoundingClientRect().top <= 120) current = s;
+  }
+
+  if (innerHeight + scrollY >= document.documentElement.scrollHeight - 2) {
+    current = sections[sections.length - 1];
+  }
+  links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current.id));
+};
+addEventListener('scroll', spy, { passive: true });
+addEventListener('resize', spy);
+spy();
+
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+addEventListener('pageshow', () => { if (!location.hash) scrollTo(0, 0); });
+
+requestAnimationFrame(() => requestAnimationFrame(() => {
+  document.querySelectorAll('.main,.side').forEach(el => el.classList.add('in'));
+}));
+</script>
+</body>
+</html>
