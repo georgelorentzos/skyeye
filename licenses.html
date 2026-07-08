@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SkyEye Pricing</title>
+<title>SkyEye · Plans &amp; Pricing</title>
 <meta name="description" content="SkyEye lifetime licenses. Pay once, own it forever. It runs on your server: no third party, your traffic never leaves your machine.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -213,7 +213,11 @@ h1 .dim{color:#6b7280}
 
 <script>
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-addEventListener('pageshow', () => scrollTo(0, 0));
+addEventListener('pageshow', () => {
+  document.documentElement.style.scrollBehavior = 'auto';
+  scrollTo(0, 0);
+  document.documentElement.style.scrollBehavior = '';
+});
 
 requestAnimationFrame(() => requestAnimationFrame(() => {
   document.querySelector('.page').classList.add('in');
