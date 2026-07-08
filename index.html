@@ -327,11 +327,16 @@ h1 .dim{color:#6b7280}
 <script>
 
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-scrollTo(0, 0);
+const hardTop = () => {
+  document.documentElement.style.scrollBehavior = 'auto';
+  scrollTo(0, 0);
+  document.documentElement.style.scrollBehavior = '';
+};
+hardTop();
 addEventListener('pageshow', e => {
   if (!e.persisted && !scrollY) return;
   document.documentElement.classList.add('noanim');
-  scrollTo(0, 0);
+  hardTop();
   dispatchEvent(new Event('scroll'));
   requestAnimationFrame(() => requestAnimationFrame(() => {
     document.documentElement.classList.remove('noanim');
