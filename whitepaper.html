@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkyEye Whitepaper</title>
+<meta name="description" content="SkyEye: A Self-Hosted Threat Defense System. The whitepaper by George Lorentzos. Why the defense of an application should live on the server it protects.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#000;
+  --black:#000;
+  --panel:#000;
+  --txt:#f2f4f7;
+  --dim:#848b96;
+  --faint:#41474f;
+  --hair:rgba(255,255,255,.07);
+  --hair2:rgba(255,255,255,.05);
+  --acc:#fff;
+  --sans:'Inter',system-ui,sans-serif;
+  --disp:'Inter',system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,'SF Mono',Menlo,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0!important}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--txt);font-family:var(--sans);
+  font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+::selection{background:#fff;color:#000}
+a{color:inherit}
+
+html{scrollbar-width:none;-ms-overflow-style:none}
+*{scrollbar-width:none}
+::-webkit-scrollbar{display:none}
+
+.shell{display:grid;grid-template-columns:250px 1fr;width:100%;gap:0;padding-top:75px}
+@media(max-width:860px){.shell{grid-template-columns:1fr}}
+
+.side{
+  position:sticky;top:75px;align-self:start;height:calc(100vh - 75px);overflow-y:auto;
+  border-right:1px solid var(--hair);padding:34px 26px 60px;
+}
+@media(max-width:860px){.side{display:none}}
+.brand{font-family:var(--disp);font-weight:700;font-size:20px;letter-spacing:-.02em;margin-bottom:4px;color:#fff}
+.brand a{text-decoration:none}
+.brand .d{color:#6b7280}
+.side .tag{font-size:12.5px;color:var(--faint);margin-bottom:30px}
+.side h4{font-family:var(--sans);font-weight:500;font-size:12.5px;color:var(--faint);margin:26px 0 10px}
+.side a.nav{display:block;text-decoration:none;color:var(--dim);font-size:13.5px;padding:5px 0;transition:color .15s}
+.side a.nav:hover{color:#fff}
+.side a.nav.active{color:#fff}
+
+.top{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  width:100%;padding:22px 32px;
+  border-bottom:1px solid var(--hair);
+  background:rgba(0,0,0,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.top .brand{margin-bottom:0}
+.top nav{display:flex;gap:26px}
+.top nav a{font-size:13.5px;color:var(--dim);text-decoration:none;transition:color .15s}
+.top nav a:hover{color:#fff}
+.top nav a.here{color:#fff}
+@media(max-width:640px){
+  .top{justify-content:center}
+  .top .brand{display:none}
+}
+
+.main,.side{
+  opacity:0;transform:translateY(52px) scale(.985);filter:blur(10px);
+  transition:opacity .55s ease,transform .6s cubic-bezier(.2,.7,.3,1),filter .55s ease;
+}
+.main.in,.side.in{opacity:1;transform:none;filter:none}
+.main{padding:calc(clamp(110px,15vh,160px) - 75px) 56px 140px;min-width:0}
+@media(max-width:860px){.main{padding:calc(clamp(110px,15vh,160px) - 75px) 26px 100px}}
+.main section{margin-bottom:64px;scroll-margin-top:99px}
+h1{font-family:var(--disp);font-weight:700;font-size:clamp(38px,4.5vw,52px);letter-spacing:-.04em;line-height:1.02;margin-bottom:20px;color:#fff}
+h1 .dim,h2 .dim{color:#6b7280}
+.lede{color:var(--dim);font-size:20px;line-height:1.65;max-width:620px;margin-bottom:20px}
+.lede b{color:var(--txt);font-weight:500}
+h2{font-family:var(--disp);font-weight:700;font-size:28px;letter-spacing:-.035em;line-height:1.12;margin-bottom:14px;padding-top:8px;color:#fff}
+h3{font-family:var(--disp);font-weight:600;font-size:18px;letter-spacing:-.02em;margin:26px 0 10px;color:#fff;scroll-margin-top:99px}
+p{color:var(--dim);margin-bottom:14px;max-width:680px}
+p b,li b{color:var(--txt);font-weight:500}
+ul,ol{color:var(--dim);margin:0 0 14px 20px;max-width:680px}
+li{margin-bottom:7px}
+.hr{height:1px;background:var(--hair);border:0;margin:56px 0}
+code{font-family:var(--mono);font-size:.88em;color:#fff;background:rgba(255,255,255,.06);padding:2px 6px}
+.callout{
+  border:1px solid var(--hair);border-left:2px solid #fff;
+  background:var(--panel);padding:14px 18px;margin:0 0 18px;max-width:820px;font-size:14px;color:var(--dim);
+}
+.callout b{color:var(--txt)}
+.formula{text-align:center;font-style:italic;color:var(--txt);margin:18px 0;font-size:18px;max-width:680px}
+.refs{list-style:none;margin-left:0;font-size:14.5px}
+.refs li{margin-bottom:9px;padding-left:38px;text-indent:-38px}
+.refs .n{display:inline-block;width:32px;text-indent:0;color:var(--faint)}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><a href="index.html">Sky<span class="d">Eye</span></a></div>
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="documentation.html">Documentation</a>
+    <a href="whitepaper.html" class="here">Whitepaper</a>
+  </nav>
+</header>
+
+<div class="shell">
+
+  <aside class="side">
+    <h4>The paper</h4>
+    <a class="nav" href="#abstract">Abstract</a>
+    <a class="nav" href="#introduction">1. Introduction</a>
+
+    <h4>The defense</h4>
+    <a class="nav" href="#recognition">2. Recognition</a>
+    <a class="nav" href="#memory">3. Memory</a>
+    <a class="nav" href="#proportion">4. Proportion</a>
+    <a class="nav" href="#scanners">5. Scanners</a>
+
+    <h4>The system</h4>
+    <a class="nav" href="#gateway">6. The Gateway</a>
+    <a class="nav" href="#privacy">7. Privacy</a>
+    <a class="nav" href="#calculations">8. Calculations</a>
+
+    <h4>Closing</h4>
+    <a class="nav" href="#conclusion">9. Conclusion</a>
+    <a class="nav" href="#references">References</a>
+  </aside>
+
+  <main class="main">
+
+    <section id="abstract">
+      <h1><span class="dim">SkyEye:</span> A Self-Hosted Threat Defense System</h1>
+      <p class="lede"><b>George Lorentzos</b>, skyeye.software</p>
+      <div class="callout"><b>Abstract.</b> A purely self-hosted defense layer would allow any application to face the public internet without routing its traffic through a third party. Cloud filtering services offer part of the solution, but the main benefits are lost if every request must first pass through someone else's network. We propose a defense that lives on the server itself. A single binary stands in front of the application, inspects each request before the application hears of it, and bans hostile visitors at first contact. Offenders are remembered, and every return costs them more. The system forms its own record of hostile behavior as long as honest traffic flows through it. It requires no external service, no database and no maintenance, and the traffic never leaves the machine it protects.</div>
+    </section>
+
+    <hr class="hr">
+
+    <section id="introduction">
+      <h2>1. Introduction</h2>
+      <p>Defense on the internet has come to rely almost exclusively on cloud services acting as trusted intermediaries between applications and the people who use them. While the model works well enough for most deployments, it still suffers from the inherent weaknesses of the trust based model. Every request, every credential and every payload must be disclosed to a third party before it reaches the server it was addressed to. The operator pays for this mediation twice, once in subscription fees that scale with traffic, and once in the surrender of the traffic itself. Small operators are priced toward free tiers whose terms can change, and all operators accept that their availability now depends on someone else's outage calendar.</p>
+      <p>What is needed is a defense based on inspection instead of mediation, allowing any server to protect itself without a trusted third party. In this paper, we propose a perimeter that runs where the application runs. One self-contained executable owns the public ports, terminates the connections, judges every request against what it knows of attack behavior, and forwards to the application only what survives judgment. The application never hears from a banned visitor, and the visitor learns nothing beyond a closed door.</p>
+    </section>
+
+    <hr class="hr">
+
+    <section id="recognition">
+      <h2>2. Recognition</h2>
+      <p>The oldest signal on the public internet is a request for a path that no honest visitor would ever ask for. Requests for <code>/wp-login.php</code> on a server that has never run WordPress, for <code>/.env</code>, for backup archives and private keys, announce intent as clearly as any signature. We define a first class of judgment over these paths. The system knows the classic attack paths by name, 264 of them at the time of writing, and a request for any of them is a self-declared offense. There is nothing to tune and no model to train, because the request itself is the evidence.</p>
+      <p>Attackers rarely present an exploit plainly. They wrap it in layer after layer of encoding, expecting each filter along the way to inspect only the surface. The system therefore peels every layer of encoding, in the path and in the query string alike, and judges what is underneath. The disguise fails in both directions, because a payload that decodes into an attack is an attack, and traffic that hides under many layers of encoding has already explained why it is hiding.</p>
+    </section>
+
+    <hr class="hr">
+
+    <section id="memory">
+      <h2>3. Memory</h2>
+      <p>Most servers forgive instantly. An attacker may probe thousands of times from the same address and be greeted each time as a stranger. We propose instead that the perimeter keep a record. A first offense costs the visitor seven days of silence. A second offense costs two weeks, a third a month, and the record of offenses is kept for ninety days, so a scanner that plans to wait out its sentence returns to find a longer one. Writing <i>D(n)</i> for the duration of the <i>n</i>th offense and <i>M</i> for the memory of the record, the schedule is</p>
+      <p class="formula">D(2) &ge; 14 days, &nbsp; D(n) &ge; 30 days for n &ge; 3, &nbsp; M = 90 days</p>
+      <p>whichever rule triggered the ban. Since <i>M</i> exceeds every <i>D(n)</i>, a persistent attacker never outlives his own record. The consequence is a hard ceiling on contact. In the steady state one address earns one probe per thirty days, twelve probes per year, against an application that answers honest visitors millions of times in the same period.</p>
+      <p>The record lives in memory, and this is a design decision rather than a limitation. A ban list that survives restarts accumulates mistakes forever and eventually requires its own administration. A ban list that lives in memory makes a restart the escape hatch for any wrongly issued ban, while the ninety day offense record still makes repeat visits expensive. Addresses the operator trusts are placed on an allowlist in the configuration file, and the allowlist is the one list that does persist, because trust granted by a human should not evaporate with a process.</p>
+      <p>An attacker with many addresses can spread offenses across them, and IPv6 makes addresses cheap. The system therefore bans IPv6 offenders by prefix rather than by address, so rotating within a subnet changes nothing. A single prefix ban covers 2<sup>64</sup> addresses, roughly 1.8 &times; 10<sup>19</sup>, which is the entire space the attacker's provider handed him in one allocation.</p>
+    </section>
+
+    <hr class="hr">
+
+    <section id="proportion">
+      <h2>4. Proportion</h2>
+      <p>Volume is the bluntest attack and the easiest to misjudge, because in the age of carrier grade NAT one address is not one person. Hundreds of honest users can share a single address, and a limit sized for one person punishes all of them. Consider an address shared by <i>k</i> users, each producing at most <i>r</i> requests per minute. The volume of the address is bounded by</p>
+      <p class="formula">V &le; kr</p>
+      <p>and any limit must sit above this bound with room to spare. The system therefore applies two thresholds. Crossing the first brings a polite refusal, a status code and nothing more, which is the correct answer to an enthusiastic client or a misconfigured retry loop. Crossing the second, set far above any plausible honest volume, brings a ban measured in hours, which is the correct answer to a flood. Writing <i>C</i> for the requests of one address inside the window <i>W</i>, the complete rule is</p>
+      <p class="formula">C &le; L &rarr; allow<br>L &lt; C &le; H &rarr; refuse<br>C &gt; H &rarr; ban</p>
+      <p>and the interval between <i>L</i> and <i>H</i> is deliberately wide, because refusal is reversible and punishment is not.</p>
+    </section>
+
+    <hr class="hr">
+
+    <section id="scanners">
+      <h2>5. Scanners</h2>
+      <p>A scanner walking a wordlist produces a signature no honest population can imitate, a stream of requests for paths that do not exist. A legitimate user behind the same address produces missing paths at a rate near zero, while the scanner produces them at a rate near one per request. The system counts these misses per address inside a short window, holding suspicious looking misses to a stricter threshold than plain ones, and bans the address that crosses either.</p>
+      <p>A patient scanner can slow its walk until it slips under any short window. For this reason a second, much longer window watches the same signal at low frequency. Writing <i>S</i> and <i>N</i> for the suspicious and total misses of one address inside the short window, and <i>S*</i> for its suspicious misses inside the long window, the address is banned when</p>
+      <p class="formula">S &ge; T<sub>s</sub> &nbsp; or &nbsp; N &ge; T<sub>a</sub> &nbsp; or &nbsp; S* &ge; T*</p>
+      <p>The two populations barely overlap. An honest address misses with some small probability <i>p</i> per request, so its expectation is <i>pkr</i> per window with <i>p</i> near zero, while the scanner's <i>p</i> is near one. The thresholds sit in the gap between them. Patience does not defeat the count, it only defers it, and the ban arrives all the same.</p>
+    </section>
+
+    <hr class="hr">
+
+    <section id="gateway">
+      <h2>6. The Gateway</h2>
+      <p>A defense that owns the public ports must also do the front door work honestly, or it cannot be deployed at all. The system is therefore a complete gateway. It routes by path prefix in the manner of nginx location blocks, with the longest prefix winning. It balances load across several backends and quietly skips a backend that stops answering. It obtains and renews its own certificates through the ACME protocol [2], so encrypted transport requires two lines of configuration and no ritual. WebSockets and event streams pass through untouched and stay open for hours, and every response streams to the visitor the moment it arrives.</p>
+      <p>The gateway refuses the jobs that would compromise the design. It does not serve files from disk, cache responses or compress them. A defense layer should hold no content worth stealing and no state worth corrupting.</p>
+    </section>
+
+    <hr class="hr">
+
+    <section id="privacy">
+      <h2>7. Privacy</h2>
+      <p>The traditional cloud model achieves protection by disclosure. The third party can only filter what it can read, so the operator's traffic, and the traffic of every one of the operator's users, is readable by the intermediary as a condition of service. Our model needs no such bargain. Inspection happens on the same machine that was going to receive the traffic anyway, so no new party learns anything. Nothing is phoned home, nothing is aggregated across customers, and the record of offenders is held in the memory of the operator's own process. The public observes only that the server defends itself.</p>
+    </section>
+
+    <hr class="hr">
+
+    <section id="calculations">
+      <h2>8. Calculations</h2>
+      <p>We consider the chance that an honest address is banned by the volume rule. With the soft threshold <i>L</i> and the hard threshold <i>H</i> set so that</p>
+      <p class="formula">kr &lt; L &lt; H</p>
+      <p>an address of <i>k</i> honest users never reaches the soft threshold, and the hard threshold sits further away still. The gap between <i>L</i> and <i>H</i> is the margin of grace, inside which the system refuses requests without punishing the address. An honest population must therefore not merely exceed expectation to be banned, it must exceed the hard threshold, which is sized at a multiple of the soft one. The path rule enjoys a stronger property. Since honest software does not request <code>/.env</code>, the false positive rate of a self-declared offense is effectively zero, which is why a first contact ban is safe there and only there.</p>
+      <p>The economics favor the defender, and the cost can be made precise. Consider a wordlist of <i>N</i> paths probed through <i>A</i> addresses. Each probe of a restricted path costs its address a ban of at least seven days, so in the long run each address delivers at most one probe per seven days, and the walk cannot finish before</p>
+      <p class="formula">T &ge; 7N / A days</p>
+      <p>One hundred addresses against ten thousand paths need seven hundred days. Escalation makes it worse for the attacker, because from the third offense each address's period stretches to thirty days and the bound tends toward 30<i>N</i> / <i>A</i>, more than eight years. The scanner's business model assumes ten thousand quiet attempts against a server that forgets each one. Against a perimeter that remembers, the walk across the wordlist does not finish, it retires.</p>
+    </section>
+
+    <hr class="hr">
+
+    <section id="conclusion">
+      <h2>9. Conclusion</h2>
+      <p>We have proposed a system for defending internet applications without relying on trust. We started with the observation that hostile traffic declares itself, through the paths it requests, the encodings it hides under and the volumes it produces, and we built the judgment for these declarations into a single binary that stands where the application stands. The defense keeps a memory of its offenders, escalates against persistence, forgives by restart, and mediates the whole conversation with the outside world while disclosing that conversation to no one. The result is a perimeter with the properties operators had before the cloud asked them to choose, ownership of the door, and knowledge of who knocks.</p>
+    </section>
+
+    <hr class="hr">
+
+    <section id="references">
+      <h2>References</h2>
+      <ol class="refs">
+        <li><span class="n">[1]</span>S. Nakamoto, "Bitcoin: A Peer-to-Peer Electronic Cash System", 2008.</li>
+        <li><span class="n">[2]</span>R. Barnes, J. Hoffman-Andrews, D. McCarney, J. Kasten, "Automatic Certificate Management Environment (ACME)", RFC 8555, 2019.</li>
+        <li><span class="n">[3]</span>J. Weil, V. Kuarsingh, C. Donley, C. Liljenstolpe, M. Azinger, "IANA-Reserved IPv4 Prefix for Shared Address Space", RFC 6598, 2012.</li>
+        <li><span class="n">[4]</span>R. Fielding, M. Nottingham, J. Reschke, "HTTP Semantics", RFC 9110, 2022.</li>
+        <li><span class="n">[5]</span>OWASP Foundation, "OWASP Top Ten", owasp.org.</li>
+      </ol>
+    </section>
+
+  </main>
+</div>
+
+<script>
+
+const links = [...document.querySelectorAll('.side a.nav')];
+const sections = links
+  .map(a => document.getElementById(a.getAttribute('href').slice(1)))
+  .filter(Boolean);
+
+const spy = () => {
+  let current = sections[0];
+  for (const s of sections) {
+    if (s.getBoundingClientRect().top <= 120) current = s;
+  }
+
+  if (innerHeight + scrollY >= document.documentElement.scrollHeight - 2) {
+    current = sections[sections.length - 1];
+  }
+  links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + current.id));
+};
+addEventListener('scroll', spy, { passive: true });
+addEventListener('resize', spy);
+spy();
+
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+addEventListener('pageshow', () => {
+  if (location.hash) return;
+  document.documentElement.style.scrollBehavior = 'auto';
+  scrollTo(0, 0);
+  document.documentElement.style.scrollBehavior = '';
+});
+
+requestAnimationFrame(() => requestAnimationFrame(() => {
+  document.querySelectorAll('.main,.side').forEach(el => el.classList.add('in'));
+}));
+</script>
+</body>
+</html>
