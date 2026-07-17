@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkyEye, page not found</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#000;
+  --txt:#f2f4f7;
+  --dim:#848b96;
+  --faint:#41474f;
+  --hair:rgba(255,255,255,.07);
+  --sans:'Inter',system-ui,sans-serif;
+  --disp:'Inter',system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;border-radius:0!important}
+body{
+  background:var(--bg);color:var(--txt);font-family:var(--sans);
+  font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;
+  min-height:100vh;display:flex;flex-direction:column;
+}
+::selection{background:#fff;color:#000}
+a{color:inherit}
+
+html{scrollbar-width:none;-ms-overflow-style:none}
+*{scrollbar-width:none}
+::-webkit-scrollbar{display:none}
+
+.top{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;justify-content:space-between;
+  width:100%;padding:22px 32px;
+  border-bottom:1px solid var(--hair);
+  background:rgba(0,0,0,.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+}
+.brand{font-family:var(--disp);font-weight:700;font-size:20px;letter-spacing:-.02em;color:#fff}
+.brand a{text-decoration:none}
+.brand .d{color:#6b7280}
+.top nav{display:flex;gap:26px}
+.top nav a{font-size:13.5px;color:var(--dim);text-decoration:none;transition:color .15s}
+.top nav a:hover{color:#fff}
+@media(max-width:640px){
+  .top{justify-content:center}
+  .top .brand{display:none}
+}
+
+.hero{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:120px 32px 80px;
+  opacity:0;transform:translateY(52px) scale(.985);filter:blur(10px);
+  transition:opacity .55s ease,transform .6s cubic-bezier(.2,.7,.3,1),filter .55s ease;
+}
+.hero.in{opacity:1;transform:none;filter:none}
+h1{font-family:var(--disp);font-weight:700;font-size:clamp(64px,12vw,140px);letter-spacing:-.04em;line-height:1;color:#fff;margin-bottom:18px}
+h1 .dim{color:#6b7280}
+.sub{color:var(--dim);font-size:18px;max-width:480px;margin-bottom:40px;line-height:1.7}
+.sub b{color:var(--txt);font-weight:500}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><a href="https://skyeye.software/">Sky<span class="d">Eye</span></a></div>
+  <nav>
+    <a href="https://skyeye.software/">Home</a>
+    <a href="https://skyeye.software/documentation">Documentation</a>
+    <a href="https://skyeye.software/whitepaper">Whitepaper</a>
+  </nav>
+</header>
+
+<main class="hero" id="hero">
+  <h1>4<span class="dim">0</span>4</h1>
+  <p class="sub">Nothing lives at this path. <b>Don't worry, we saw it, we just know you are not an attacker.</b></p>
+</main>
+
+<script>
+requestAnimationFrame(() => requestAnimationFrame(() => {
+  document.getElementById('hero').classList.add('in');
+}));
+</script>
+</body>
+</html>
