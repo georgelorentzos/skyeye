@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SkyEye · Documentation</title>
+<title>SkyEye Documentation</title>
 <meta name="description" content="The SkyEye handbook: getting started, HTTPS, routing, the defense system, and day-to-day commands. Everything you need, chapter by chapter.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -122,11 +122,11 @@ td:last-child{color:var(--dim)}
 <body>
 
 <header class="top">
-  <div class="brand">Sky<span class="d">Eye</span></div>
+  <div class="brand"><a href="index.html">Sky<span class="d">Eye</span></a></div>
   <nav>
-    <a href="/">Home</a>
-    <a href="/documentation" class="here">Documentation</a>
-    <a href="/licenses">Licenses</a>
+    <a href="index.html">Home</a>
+    <a href="documentation.html" class="here">Documentation</a>
+    <a href="whitepaper.html">Whitepaper</a>
   </nav>
 </header>
 
@@ -183,8 +183,10 @@ sudo ./skyeye</code></pre>
       <p>On this first run SkyEye writes a starter <code>skyeye.yaml</code> next to itself, starts listening on port 80, and forwards traffic to <code>http://127.0.0.1:8080</code>. If that's where your app lives, you are already protected.</p>
 
       <h3>Step 2: Point it at your app</h3>
-      <p>Open <code>skyeye.yaml</code> and set one line to wherever your application listens:</p>
-      <pre><code><span class="k">backend_url</span>: <span class="s">http://127.0.0.1:3000</span></code></pre>
+      <p>Open <code>skyeye.yaml</code> and point the catch-all route at wherever your application listens:</p>
+      <pre><code><span class="k">routes</span>:
+  - <span class="k">prefix</span>: <span class="s">/</span>
+    <span class="k">target</span>: <span class="s">http://127.0.0.1:3000</span></code></pre>
 
       <h3>Step 3: Make it a service</h3>
       <p>For a real server you want SkyEye to start on boot and restart if it ever dies. One systemd unit does it:</p>
@@ -219,7 +221,9 @@ WantedBy=multi-user.target</code></pre>
 
       <h3>A realistic production config</h3>
       <p>This is what a typical finished file looks like: one app, HTTPS, and an office IP that can never be banned:</p>
-      <pre><code><span class="k">backend_url</span>: <span class="s">http://127.0.0.1:8080</span>
+      <pre><code><span class="k">routes</span>:
+  - <span class="k">prefix</span>: <span class="s">/</span>
+    <span class="k">target</span>: <span class="s">http://127.0.0.1:8080</span>
 
 <span class="k">tls</span>: <span class="k">true</span>
 <span class="k">domains</span>: [<span class="s">api.example.com</span>]
@@ -231,7 +235,7 @@ WantedBy=multi-user.target</code></pre>
       <p>Almost everything applies live with <code>skyeye reload</code>: routes, the allowlist, rate limits, ban durations, thresholds. A few settings rebind network sockets and need a full restart instead:</p>
       <ul>
         <li><code>listen_addr</code> and the TLS group (<code>tls</code>, <code>tls_addr</code>, <code>domains</code>, <code>cert_dir</code>)</li>
-        <li><code>backend_url</code></li>
+        <li><code>control_socket</code></li>
       </ul>
       <div class="callout">You don't have to memorize this list. If you <code>skyeye reload</code> and a changed setting needs a restart, SkyEye <b>tells you</b> and keeps the running value until you restart.</div>
     </section>
@@ -263,7 +267,7 @@ WantedBy=multi-user.target</code></pre>
 
     <section id="routing">
       <h2>Routing</h2>
-      <p>One app needs no routing at all; <code>backend_url</code> is enough. The moment you run two services on one server, add a <code>routes</code> list. It's SkyEye's version of nginx <code>location</code> blocks, readable by humans:</p>
+      <p>Every setup has a <code>routes</code> list. One app is just a single catch-all route, and the moment you run two services on one server you add entries above it. It's SkyEye's version of nginx <code>location</code> blocks, readable by humans:</p>
       <pre><code><span class="k">routes</span>:
   - <span class="k">prefix</span>: <span class="s">/api/</span>
     <span class="k">target</span>: <span class="s">http://127.0.0.1:9000</span>
@@ -301,7 +305,7 @@ WantedBy=multi-user.target</code></pre>
       <p>Should the backend see the full public path, or the path with the prefix removed? SkyEye auto-detects from the target: <b>a target with a path strips, a bare host keeps.</b> Set <code>strip</code> yourself only to override.</p>
       <table>
         <tr><th>Route</th><th>Request</th><th>Backend receives</th></tr>
-        <tr><td><code>/livekit/</code> → <code>...:7880/</code> <span class="tag2">strip</span></td><td><code>/livekit/rtc</code></td><td><code>/rtc</code></td></tr>
+        <tr><td><code>/media/</code> → <code>...:7880/</code> <span class="tag2">strip</span></td><td><code>/media/rtc</code></td><td><code>/rtc</code></td></tr>
         <tr><td><code>/</code> → <code>...:8080</code> <span class="tag2">keep</span></td><td><code>/pricing</code></td><td><code>/pricing</code></td></tr>
         <tr><td><code>/api/</code> → <code>...:8080/v2/</code> <span class="tag2">strip</span></td><td><code>/api/users</code></td><td><code>/v2/users</code></td></tr>
       </table>
